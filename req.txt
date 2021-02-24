@@ -1,2 +1,4 @@
+python
 pyglet
 numpy
+scikit-learn
