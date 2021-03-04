@@ -3,12 +3,18 @@ from pyglet.gl import *
 from collections import OrderedDict
 from time import time
 import pyglet.window.key as key
-from ant import Ant
+from ant import Ant, RedAnt, GreenAnt
 import numpy as np
-ant_img = pyglet.image.load("..\\sprites\\ant.png")
+
+### TO DO:
+# IMPROVE CHECKING COLISION
 class Board(pyglet.window.Window):
+    res = {"x": 1000, "y": 1000}
+
     def __init__(self, iteration=0, *args, **kwargs):
-        super(Board, self).__init__(*args, **kwargs)
+        super(Board, self).__init__(
+            width=self.res["x"], height=self.res["y"], *args, **kwargs
+        )
         self.alive = 1
         # initialize labels
 
@@ -18,9 +24,12 @@ class Board(pyglet.window.Window):
             f"iteration: {iteration}", x=self.width - 100, y=self.height - 50
         )
         # initialize ants
-        self.ants = OrderedDict()
-        self.ants["ant1"] = Ant(ant_img, x=100, y=100)
-        self.ants["ant2"] = Ant(ant_img, x=200, y=200)
+        self.red_ants, self.red_ants_batch = Ant.spawn_batch(
+            RedAnt, res=self.res, count=15, name="RED"
+        )
+        self.green_ants, self.green_ants_batch = Ant.spawn_batch(
+            GreenAnt, res=self.res, count=15, name="GREEN"
+        )
         # For FPS calculation
         self.last_update = time()
         self.fps_count = 0
@@ -40,11 +49,26 @@ class Board(pyglet.window.Window):
         for label in self.labels:
             self.labels[label].draw()
 
+    def update_ants(self):
+
+        for red_ant in self.red_ants.keys():
+            for green_ant in self.green_ants.keys():
+                # print(f"Checking colision between: {red_ant} and {green_ant}")
+                visible_range, colision = self.red_ants[red_ant].check_colision(
+                    self.green_ants[green_ant]
+                )
+                if visible_range:
+                    print(f"visible :{visible_range}, colision: {colision}")
+                pass
+            self.red_ants[red_ant].move()
+        for green_ant in self.green_ants.keys():
+
+            self.green_ants[green_ant].move()
+
     def draw_ants(self):
         "draw all sprites"
-        for ant in self.ants:
-            self.ants[ant].move()
-            self.ants[ant].draw()
+        self.red_ants_batch.draw()
+        self.green_ants_batch.draw()
 
     def on_draw(self):
         self.render()
@@ -64,7 +88,7 @@ class Board(pyglet.window.Window):
         self.count_fps()
 
         self.pre_render()
-
+        self.update_ants()
         self.draw_ants()
         self.draw_labels()
 
