@@ -1,3 +1,4 @@
+"class for Ant objects"
 import pyglet
 import numpy as np
 

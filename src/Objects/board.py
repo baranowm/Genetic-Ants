@@ -1,3 +1,5 @@
+"Class for creating an environment for the ants"
+
 import pyglet
 from pyglet.gl import *
 from collections import OrderedDict
@@ -102,6 +104,3 @@ class Board(pyglet.window.Window):
             event = self.dispatch_events()
 
 
-if __name__ == "__main__":
-    board = Board()
-    board.run()
