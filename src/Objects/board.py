@@ -51,19 +51,17 @@ class Board(pyglet.window.Window):
 
     def update_ants(self):
 
-        for red_ant in self.red_ants.keys():
-            for green_ant in self.green_ants.keys():
-                # print(f"Checking colision between: {red_ant} and {green_ant}")
-                visible_range, colision = self.red_ants[red_ant].check_colision(
-                    self.green_ants[green_ant]
-                )
-                if visible_range:
-                    print(f"visible :{visible_range}, colision: {colision}")
-                pass
-            self.red_ants[red_ant].move()
+        for key, red_ant in self.red_ants.items():
+            colisions = red_ant.batch_colision_check(
+                self.green_ants.values(), self.green_ants.keys()
+            )
+            red_ant.move()
         for green_ant in self.green_ants.keys():
-
+            colisions = red_ant.batch_colision_check(
+                self.green_ants.values(), self.green_ants.keys()
+            )
             self.green_ants[green_ant].move()
+        
 
     def draw_ants(self):
         "draw all sprites"

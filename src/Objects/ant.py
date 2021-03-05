@@ -11,6 +11,7 @@ class Ant(pyglet.sprite.Sprite):
         self.x = x
         self.y = y
         self.rotation = 0
+        self.col_radius = self.img.width / 2
 
     def move(self):
         self.x += 1
@@ -29,33 +30,24 @@ class Ant(pyglet.sprite.Sprite):
         texture.height = int(scale * img.height)
         return img
 
-    def _colision_pre_check(self, other):
-        "returns true if on x or y axis the dist > view_distance"
-        return min(abs(self.x - other.x), abs(self.y - other.y)) > min(
-            self.view_dist, other.view_dist
-        )
+    def batch_colision_check(self, others, others_names):
+        other_m = np.asmatrix([[other.x, other.y, other.rotation] for other in others])
+        self_m = np.zeros(other_m.shape) + np.asmatrix([self.x, self.y, self.rotation])
+        dist_m = np.linalg.norm(other_m[:, :2] - self_m[:, :2], axis =1)
 
-    def check_colision(self, other):
-        dist_simplified = min(abs(self.x - other.x), abs(self.y - other.y))
-        visible_range, colision = False, False
-        if self._colision_pre_check(other):
-            # False, False
-            visible_range, colision = False, False
-        else:
-            visible_range = True
-            if dist_simplified < (self.img.width / 2 + other.img.width / 2) ** 2:
-                colision = True
-            else:
-                colision = False
+        vis = np.zeros(self_m[:,:2].shape)
+        vis[:, 0] = dist_m < self.view_dist
+        vis[:,1] = dist_m < self.col_radius
 
-        return visible_range, colision
+        return vis
+
 
     @staticmethod
     def spawn_batch(ant_class, res, count, name=""):
         batch = pyglet.graphics.Batch()
 
         sprites = {
-            f"name_{i}": ant_class(x, y, batch=batch)
+            f"{name}_{i}": ant_class(x, y, batch=batch)
             for i, (x, y) in enumerate(
                 zip(
                     np.random.randint(low=0, high=res["x"], size=count),
