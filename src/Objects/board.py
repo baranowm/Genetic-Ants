@@ -61,7 +61,6 @@ class Board(pyglet.window.Window):
                 self.green_ants.values(), self.green_ants.keys()
             )
             self.green_ants[green_ant].move()
-        
 
     def draw_ants(self):
         "draw all sprites"

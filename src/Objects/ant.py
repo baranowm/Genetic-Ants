@@ -13,10 +13,11 @@ class Ant(pyglet.sprite.Sprite):
         self.rotation = 0
         self.col_radius = self.img.width / 2
 
-    def move(self):
-        self.x += 1
-        self.y += 1
-        self.rotation += 0.1
+    def move(self, input_m=[1, 1]):
+
+        self.rotation += input_m[0]
+        self.x += int(np.sin(np.deg2rad(self.rotation)) * self.max_speed * input_m[1])
+        self.y += int(np.cos(np.deg2rad(self.rotation)) * self.max_speed * input_m[1])
         self.update(self.x, self.y, self.rotation)
 
     @staticmethod
@@ -33,14 +34,13 @@ class Ant(pyglet.sprite.Sprite):
     def batch_colision_check(self, others, others_names):
         other_m = np.asmatrix([[other.x, other.y, other.rotation] for other in others])
         self_m = np.zeros(other_m.shape) + np.asmatrix([self.x, self.y, self.rotation])
-        dist_m = np.linalg.norm(other_m[:, :2] - self_m[:, :2], axis =1)
+        dist_m = np.linalg.norm(other_m[:, :2] - self_m[:, :2], axis=1)
 
-        vis = np.zeros(self_m[:,:2].shape)
+        vis = np.zeros(self_m[:, :2].shape)
         vis[:, 0] = dist_m < self.view_dist
-        vis[:,1] = dist_m < self.col_radius
+        vis[:, 1] = dist_m < self.col_radius
 
         return vis
-
 
     @staticmethod
     def spawn_batch(ant_class, res, count, name=""):
@@ -60,6 +60,7 @@ class Ant(pyglet.sprite.Sprite):
 
 class RedAnt(Ant):
     sprite_location = ".\\sprites\\red_ant.png"
+    max_speed = 3
     view_dist = 30
 
     def __init__(self, x, y, *args, **kwargs):
@@ -71,6 +72,7 @@ class RedAnt(Ant):
 class GreenAnt(Ant):
     sprite_location = ".\\sprites\\green_ant.png"
     view_dist = 30
+    max_speed = 3
 
     def __init__(self, x, y, *args, **kwargs):
         self.img = pyglet.image.load(self.sprite_location)
